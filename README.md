@@ -56,7 +56,7 @@ y_tf_idf基于y的tf-idf衍生，
 
 uns是生成四种无监督衍生（详见：https://github.com/maidoudoujiushiwo/Unsupervised ）
 
-![image](https://github.com/maidoudoujiushiwo/risk_model/blob/master/image/tsne.png)
+![image](https://github.com/maidoudoujiushiwo/risk_model/image/tsne.png)
 
 可以看到根据german_credit的数据画出图的标记，虽然是无监督生成的结果，但是对y的0和1区分能力很强很契合，可能有一定运气的成分。
 
@@ -134,8 +134,8 @@ ad._plot()
 
 
 german_credit的数据结果如下
-![image](https://github.com/maidoudoujiushiwo/risk_model/blob/master/image/fa0.png)
-![image](https://github.com/maidoudoujiushiwo/risk_model/blob/master/image/fa1.png)
+![image](https://github.com/maidoudoujiushiwo/risk_model/image/fa0.png)
+![image](https://github.com/maidoudoujiushiwo/risk_model/image/fa1.png)
 
 # 5 build_model.py
 
@@ -149,8 +149,8 @@ shap_woe_explain是用来解释机器学习模型中变量是否合理的，如�
 
 如图所示两种情况：
 
-![image](https://github.com/maidoudoujiushiwo/risk_model/blob/master/image/微信图片_20200804221500.jpg)
-![image](https://github.com/maidoudoujiushiwo/risk_model/blob/master/image/微信图片_20200804221506.jpg)
+![image](https://github.com/maidoudoujiushiwo/risk_model/image/微信图片_20200804221500.jpg)
+![image](https://github.com/maidoudoujiushiwo/risk_model/image/微信图片_20200804221506.jpg)
 
 # 6 distribution_adjust.py
 
