@@ -25,6 +25,8 @@
 
 7、评分卡打分代码。score.py
 
+附录：根据vintage 风险水平，计算年化风险
+
 # 应用解释：
 
 # 1 data_transform.py 
