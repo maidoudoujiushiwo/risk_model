@@ -9,6 +9,94 @@ import re
 
 
 
+def sore_trains(data,me1,predict,coo):
+#    dat1=data.copy()
+#    for j in  coo:
+#            dat1[j]=0
+#    dat1['1']=0
+#    dat1['p_mid']=predict(dat1)
+#    dat1['mid_score']=dat1['p_mid'].apply(lambda x:(np.log(1/x-1)/np.log(2)-np.log(20)/np.log(2))*20+600).apply(int)    
+#    constant1=dat1['mid_score'].mean()
+
+
+    dat1=data.copy()
+    for j in  coo:
+            dat1[j]=0
+    dat1['1']=1
+    dat1['p_mid']=predict(dat1)
+    dat1['mid_score']=dat1['p_mid'].apply(lambda x:(np.log(1/x-1)/np.log(2)-np.log(20)/np.log(2))*20+600).apply(int)    
+    constant=dat1['mid_score'].mean()
+
+        
+    scor=[]    
+    for l in coo:
+        dat1=data.copy()
+        for j in  coo:
+            if j!=l:
+                dat1[j]=0
+        dat1['p_mid']=predict(dat1)
+        dat1['mid_score']=dat1['p_mid'].apply(lambda x:(np.log(1/x-1)/np.log(2)-np.log(20)/np.log(2))*20+600).apply(int)-constant    
+#        dat1['mid_score']=dat1['p_mid'].apply(lambda x:(np.log(1/x-1)/np.log(2))*20).apply(int)
+        mid=dat1.groupby(l)['mid_score'].mean()
+        
+        mid=pd.DataFrame(mid)
+        cd=me1[me1['var']==l].copy()
+        cd['1']=range(len(cd))
+        cd['WOE']=cd['WOE']+cd['1']/100000
+        cd['in']=cd.index
+        cd.index=cd['WOE']
+        cd['WOEs']=mid['mid_score']
+        cd.index=cd['in']
+
+        scor.append(cd)
+        dat1=data.copy()
+    
+    score_=pd.concat(scor)
+    score_['constant']=constant
+    del score_['in']
+    return score_
+
+
+
+def score_pr(m,messa,out_in_list):
+    m=m.copy()
+    col=list(messa['var'].unique())
+    m['score']=0
+    k=col[2]    
+    for k in col:
+
+        cd=messa[messa['var']==k].copy()
+        cd['1']=range(len(cd))
+        cd['WOE']=cd['WOEs']
+        cd['WOE']=cd['WOE']+cd['1']/100000
+
+        dc=dict()
+#        l=1
+        for l in range(len(cd)):                
+            dc[list(cd['WOE'])[l]]=cd['Bin'][l].replace(')','').replace('(','').replace(']','').split(',')
+            if len(dc[list(cd['WOE'])[l]])==1:
+                dc[list(cd['WOE'])[l]]=dc[list(cd['WOE'])[l]][0]
+        for woe in dc:
+            if len(dc[woe])!=2:
+                match_case = re.compile("\(|\)|\[|\]")
+                end_points = match_case.sub('', dc[woe]).split(', ')
+                dc[woe] = end_points
+            
+        for l in dc:
+            if len(dc[l])==1:
+                out_in_list.append(dc[l][0])
+
+        m[k+'s']= list(map(lambda x: var_woe(x, dc, out_in_list), m[k].map(lambda x: float(x))))
+        m['score']=m[k+'s'].apply(int)+m['score']
+    m['score']=m['score']+messa['constant'].mean()
+    return m['score']    
+
+
+
+
+
+
+
 def score_cut(woe,f,c,base,odd,pdo):
     a=list(float(pdo)/np.log(2)*(np.array(woe).dot(f)))
     return [int(x) for x in a]
@@ -154,35 +242,3 @@ class score():
         di['interception']=int(score1(self.base,self.odd,self.pdo,f[f[0]==1][1])) 
         self.di=di
         return self
-
-
-
-
-
-
-#
-#
-#ccc=score(result,coooo,ceshi.messa,600,20,20)
-#
-#         
-#
-#
-#
-#
-#
-#ccc._score()
-#
-#
-#
-#
-#ccc.di
-
-
-
-
-
-
-
-
-
-
