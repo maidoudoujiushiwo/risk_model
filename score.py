@@ -7,8 +7,6 @@ Created on Tue Aug  4 15:14:13 2020
 
 import re
 
-
-
 def sore_trains(data,me1,predict,coo):
 #    dat1=data.copy()
 #    for j in  coo:
