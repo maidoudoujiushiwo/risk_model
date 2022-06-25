@@ -47,7 +47,16 @@ class stepwise(object):
                 logit = sm.Logit(self.Data[self.y],self.Data[ccc+['1']])
                 result = logit.fit()
                 res=result.summary()
-                if self.test(res):
+                
+                if len(ccc)>1:
+                    aa=self.Data[ccc].corr(method='spearman')
+                    mx=aa[aa[l]!=1][l].max()
+                else：
+                    mx=0
+
+                    
+                
+                if self.test(res) and abs(mx)<.6:
                     rre=result.predict(self.Data[ccc+['1']])
                     self.Data['p']=rre    
     #                self.col_set.append(set(ccc))               
@@ -93,6 +102,124 @@ class stepwise(object):
         else:
             return True
 
+
+
+
+
+class ensembel_logit:
+    def __init__(self,y,data,ci): 
+        self.y=y
+        self.data=data.copy()
+        self.ci=ci
+        self.cr=[]
+        self.co=[]
+        self.cres=[]
+
+        self.cr1=[]
+        self.co1=[]
+        self.cres1=[]
+    def _train(self,n,rate):
+        y=self.y
+        self.data['1']=1
+        cr=[]
+        co=[]
+        cres=[]
+        cc=[]
+        for c in self.ci:
+            aaa=stepwise(Data=self.data,Data1=self.data,col=c,y=self.y)    
+            aaa.s_interfect()
+            am=0 
+            for l in range(n):
+                cq=aaa.generate()
+                if cq=='break':
+                    break
+                if aaa.best_auc-am>rate:
+                    am=aaa.best_auc
+                else:
+                    break
+            coooo=aaa.best
+            logit = sm.Logit(self.data[y],self.data[coooo+['1']])          
+            result = logit.fit()
+            res=result.summary()
+            self.data['p_'+str(self.ci.index(c))]=result.predict(self.data[coooo+['1']])
+            self.data['p_'+str(self.ci.index(c))]=self.data['p_'+str(self.ci.index(c))].apply(lambda x:-np.log(1/x-1))
+            cc.append('p_'+str(self.ci.index(c)))
+            cr.append(result)
+            co.append(coooo)            
+            cres.append(res)
+            
+        logit = sm.Logit(self.data[y],self.data[cc+['1']])                  
+        result = logit.fit()
+        res=result.summary()
+            
+        self.cr=cr
+        self.co=co
+        self.cres=cres
+        self.cr.append(result)
+        self.co.append(cc)
+        self.cres.append(res)
+        
+        return self
+
+    def _train1(self,n,rate):
+        self.data['1']=1
+
+        aaa=stepwise(Data=self.data,Data1=self.data,col=c,y=self.y)    
+        aaa.s_interfect()
+        am=0
+ 
+        for l in range(n):
+            cq=aaa.generate()
+            if cq=='break':
+                break
+            if aaa.best_auc-am>rate:
+                am=aaa.best_auc
+            else:
+                break
+        coooo=aaa.best
+        logit = sm.Logit(self.data[y],self.data[coooo+['1']])                  
+        result = logit.fit()
+        res=result.summary()
+        logit = sm.Logit(self.data[y],self.data[cc+['1']])          
+        result = logit.fit()
+        res=result.summary()            
+        self.cr1=result
+        self.co1=coooo
+        self.cres1=res        
+        return self
+        
+        
+    def _predict(self,data1):
+        if len(self.co)==0:
+            print ('have not train the model') 
+            return None
+        else:
+            for i in range(len(self.cr))[:-1]:
+                data1['p_'+str(i)]=self.cr[i].predict(data1[self.co[i]+['1']])
+                data1['p_'+str(i)]=data1['p_'+str(i)].apply(lambda x:-np.log(1/x-1))
+
+            data1['p_re']=self.cr[-1].predict(data1[self.co[-1]+['1']])
+            return data1['p_re']
+    def predict(self,data1):
+        if len(self.co)==0:
+            print ('have not train the model') 
+            return None
+        else:
+            for i in range(len(self.cr))[:-1]:
+                data1['p_'+str(i)]=self.cr[i].predict(data1[self.co[i]+['1']])
+                data1['p_'+str(i)]=data1['p_'+str(i)].apply(lambda x:-np.log(1/x-1))
+
+            data1['p_re']=self.cr[-1].predict(data1[self.co[-1]+['1']])
+            return data1
+
+    def _predict1(self,data1):
+        if len(self.co1)==0:
+            print ('have not train the model') 
+            return None
+        else:
+            data1['p_'+str(i)]=self.cr1.predict(data1[self.co1+['1']])
+            return data1['p_re']
+                
 
 import pandas as pd
 import numpy as np
@@ -425,14 +552,3 @@ class MyRNN(keras.Model):
 
         return prob                
     
-    
-
-
-
-
-
-
-
-
-
-
